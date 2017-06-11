@@ -23,6 +23,11 @@ namespace DevTicket
             bundles.Add(new StyleBundle("~/Content/css").Include(
                       "~/Content/bootstrap.css",
                       "~/Content/site.css"));
+
+            bundles.Add(new ScriptBundle("~/bundles/app").Include(
+                "~/Scripts/app/UserTicket.js",
+                "~/Scripts/app/DevTicket.js",
+                "~/Scripts/app/app.js"));
         }
     }
 }

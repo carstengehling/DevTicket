@@ -7,11 +7,12 @@ namespace DevTicket.Models
     {
         public int Id { get; set; }
         [Required]
-        public string User { get; set; }
+        public string CreatedBy { get; set; }
         [Required]
         public string Description { get; set; }
         public DateTime Created { get; set; }
-        public DateTime PickedUp { get; set; }
-        public DateTime Closed { get; set; }
+        public DateTime? PickedUp { get; set; }
+        public string PickedUpBy { get; set; }
+        public DateTime? Closed { get; set; }
     }
 }

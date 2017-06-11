@@ -1,0 +1,34 @@
+﻿<div class="row">
+    <div class="col-md-12">
+        <form id="userForm">
+            <div class="form-group">
+                <label for="userName">Navn</label>
+                <input type="text" class="form-control" id="userName" placeholder="Navn">
+            </div>
+        </form>
+
+        <h2>Sager i kø</h2>
+        <table id="tickets" class="table">
+            <thead>
+                <tr>
+                    <th>Oprettet</th>
+                    <th>Beskrivelse</th>
+                    <th>Behandles</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section scripts
+{
+    <script>
+        $(function () {
+            $.devTicket = new DevTicket();
+            $.devTicket.Init();
+        });
+    </script>
+}

@@ -29,58 +29,48 @@ namespace DevTicket.Controllers
         {
             Ticket ticket = await db.Tickets.FindAsync(id);
             if (ticket == null)
-            {
                 return NotFound();
-            }
 
             return Ok(ticket);
         }
 
-        // PUT: api/Tickets/5
+        //// PUT: api/Tickets/5
         [ResponseType(typeof(void))]
-        public async Task<IHttpActionResult> PutTicket(int id, Ticket ticket)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+        //public async Task<IHttpActionResult> PutTicket(int id, Ticket ticket)
+        //{
+        //    if (!ModelState.IsValid)
+        //        return BadRequest(ModelState);
 
-            if (id != ticket.Id)
-            {
-                return BadRequest();
-            }
+        //    if (id != ticket.Id)
+        //        return BadRequest();
 
-            db.Entry(ticket).State = EntityState.Modified;
+        //    db.Entry(ticket).State = EntityState.Modified;
 
-            try
-            {
-                await db.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!TicketExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+        //    try
+        //    {
+        //        await db.SaveChangesAsync();
+        //    }
+        //    catch (DbUpdateConcurrencyException)
+        //    {
+        //        if (!TicketExists(id))
+        //            return NotFound();
+        //        else
+        //            throw;
+        //    }
 
-            return StatusCode(HttpStatusCode.NoContent);
-        }
+        //    return StatusCode(HttpStatusCode.NoContent);
+        //}
 
         // POST: api/Tickets
         [ResponseType(typeof(Ticket))]
         public async Task<IHttpActionResult> PostTicket(Ticket ticket)
         {
             if (!ModelState.IsValid)
-            {
                 return BadRequest(ModelState);
-            }
 
+            ticket.Created = DateTime.Now;
             db.Tickets.Add(ticket);
+
             await db.SaveChangesAsync();
 
             return CreatedAtRoute("DefaultApi", new { id = ticket.Id }, ticket);
@@ -92,22 +82,37 @@ namespace DevTicket.Controllers
         {
             Ticket ticket = await db.Tickets.FindAsync(id);
             if (ticket == null)
-            {
                 return NotFound();
-            }
 
-            db.Tickets.Remove(ticket);
+            ticket.Closed = DateTime.Now;
+            db.Entry(ticket).State = EntityState.Modified;
+
             await db.SaveChangesAsync();
 
             return Ok(ticket);
         }
 
+        // PUT: api/Tickets/5
+        [ResponseType(typeof(void))]
+        public async Task<IHttpActionResult> PutTicket(int id, string name)
+        {
+            Ticket ticket = await db.Tickets.FindAsync(id);
+            if (ticket == null)
+                return NotFound();
+
+            ticket.PickedUp = DateTime.Now;
+            ticket.PickedUpBy = name;
+            db.Entry(ticket).State = EntityState.Modified;
+
+            await db.SaveChangesAsync();
+
+            return StatusCode(HttpStatusCode.NoContent);
+        }
+
         protected override void Dispose(bool disposing)
         {
             if (disposing)
-            {
                 db.Dispose();
-            }
             base.Dispose(disposing);
         }
 
