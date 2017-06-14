@@ -26,9 +26,15 @@ DevTicket.prototype.TicketToHtml = function (ticket) {
     s += "<td><b>" + ticket.CreatedBy + "</b><br/><i>" + created + "</i></td>";
     s += "<td>" + ticket.Description + "</td>";
     s += "<td><b>" + pickedUpBy + "</b><br/><i>" + pickedUp + "</i></td>";
+
+    if (pickedUp == "") {
+        s += "<td>";
+        s += "<a href=\"#\" class=\"pickupTicket\" data-id=\"" + ticket.Id + "\">Pickup</a> ";
+        s += "</td>";
+    }
     s += "<td>";
-    s += "<a href=\"#\" class=\"pickupTicket\" data-id=\"" + ticket.Id + "\">Pickup</a> ";
     s += "<a href=\"#\" class=\"deleteTicket\" data-id=\"" + ticket.Id + "\">Delete</a> ";
+    s += "</td>";
     s += "</tr>";
     return s;
 };
@@ -36,29 +42,29 @@ DevTicket.prototype.TicketToHtml = function (ticket) {
 DevTicket.prototype.DateToString = function (date) {
     var day = ("0" + date.getDate()).slice(-2);
     var month = ("0" + (date.getMonth() + 1)).slice(-2);
-    var year = date.getFullYear()
+    var year = date.getFullYear();
     var hour = date.getHours();
     var minute = date.getMinutes();
     return day + "-" + month + "-" + year + " " + hour + ":" + minute;
 };
 
-DevTicket.prototype.PickupTicket = function (id, name)
-{
-    var ticket = {
-        PickedUpBy: name
+DevTicket.prototype.PickupTicket = function (id, name) {
+    var that = this;
+
+    var user = {
+        Name: name
     };
 
     $.ajax({
-        url: "api/tickets/" + id,
-        type: "PUT",
-        data: JSON.stringify(ticket),
+        url: "api/tickets/" + id + "/pickup",
+        type: "POST",
+        data: JSON.stringify(user),
         contentType: "application/json",
         success: function () {
             that.LoadTickets();
         }
     });
-
-}
+};
 
 DevTicket.prototype.Init = function () {
     var that = this;
