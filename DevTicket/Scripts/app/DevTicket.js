@@ -51,6 +51,8 @@ DevTicket.prototype.DateToString = function (date) {
 DevTicket.prototype.PickupTicket = function (id, name) {
     var that = this;
 
+    Cookies.set("userName", name);
+
     var user = {
         Name: name
     };
@@ -66,13 +68,30 @@ DevTicket.prototype.PickupTicket = function (id, name) {
     });
 };
 
+DevTicket.prototype.DeleteTicket = function (id) {
+    var that = this;
+
+    $.ajax({
+        url: "api/tickets/" + id,
+        type: "DELETE",
+        success: function () {
+            that.LoadTickets();
+        }
+    });
+};
 DevTicket.prototype.Init = function () {
     var that = this;
+
+    $('#userName').val(Cookies.get("userName"));
 
     $('#tickets').on("click", 'a.pickupTicket', function () {
         that.PickupTicket($(this).data("id"), $('#userName').val());
         return false;
     });
 
+    $('#tickets').on("click", 'a.deleteTicket', function () {
+        that.DeleteTicket($(this).data("id"));
+        return false;
+    });
     that.LoadTickets();
 };

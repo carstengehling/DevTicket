@@ -42,7 +42,12 @@ UserTicket.prototype.DateToString = function (date) {
 UserTicket.prototype.Init = function () {
     var that = this;
 
+    $('#ticketCreatedBy').val(Cookies.get("userName"));
+
     $('form#addTicketForm').submit(function (evt) {
+        Cookies.set("userName", $('#ticketCreatedBy').val());
+
+
         var ticket = {
             CreatedBy: $('#ticketCreatedBy').val(),
             Description: $('#ticketDescription').val()
