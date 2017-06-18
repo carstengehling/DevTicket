@@ -19,6 +19,6 @@ namespace DevTicket.Models
         {
         }
 
-        public System.Data.Entity.DbSet<DevTicket.Models.Ticket> Tickets { get; set; }
+        public DbSet<Ticket> Tickets { get; set; }
     }
 }

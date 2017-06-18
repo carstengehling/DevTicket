@@ -15,13 +15,26 @@ namespace DevTicket.Controllers
 {
     public class TicketsController : ApiController
     {
-        private DevTicketContext db = new DevTicketContext();
+        ITicketRepository _repo;
+
+        public TicketsController(ITicketRepository repo)
+        {
+            if (repo == null) throw new ArgumentNullException("repo");
+            _repo = repo;
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+                _repo.Dispose();
+            base.Dispose(disposing);
+        }
 
         // GET: api/Ticketso
         [ActionName("DefaultAction")]
-        public IQueryable<Ticket> GetTickets()
+        public IEnumerable<Ticket> GetTickets()
         {
-            return db.Tickets.Where(t => t.Closed == null);
+            return _repo.GetAll();
         }
 
         // GET: api/Tickets/5
@@ -29,10 +42,9 @@ namespace DevTicket.Controllers
         [ResponseType(typeof(Ticket))]
         public async Task<IHttpActionResult> GetTicket(int id)
         {
-            Ticket ticket = await db.Tickets.FindAsync(id);
+            Ticket ticket = await _repo.GetById(id);
             if (ticket == null)
                 return NotFound();
-
             return Ok(ticket);
         }
 
@@ -47,19 +59,11 @@ namespace DevTicket.Controllers
             if (id != ticket.Id)
                 return BadRequest();
 
-            db.Entry(ticket).State = EntityState.Modified;
+            Ticket t = await _repo.GetById(id);
+            if (t == null)
+                return NotFound();
 
-            try
-            {
-                await db.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!TicketExists(id))
-                    return NotFound();
-                else
-                    throw;
-            }
+            await _repo.Update(ticket);
 
             return StatusCode(HttpStatusCode.NoContent);
         }
@@ -72,29 +76,9 @@ namespace DevTicket.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            ticket.Created = DateTime.Now;
-            db.Tickets.Add(ticket);
-
-            await db.SaveChangesAsync();
+            await _repo.Add(ticket);
 
             return CreatedAtRoute("DefaultApi", new { id = ticket.Id }, ticket);
-        }
-
-        // DELETE: api/Tickets/5
-        [ActionName("DefaultAction")]
-        [ResponseType(typeof(Ticket))]
-        public async Task<IHttpActionResult> DeleteTicket(int id)
-        {
-            Ticket ticket = await db.Tickets.FindAsync(id);
-            if (ticket == null)
-                return NotFound();
-
-            ticket.Closed = DateTime.Now;
-            db.Entry(ticket).State = EntityState.Modified;
-
-            await db.SaveChangesAsync();
-
-            return Ok(ticket);
         }
 
         // POST: api/Tickets/5/Pickup
@@ -103,29 +87,24 @@ namespace DevTicket.Controllers
         [ActionName("Pickup")]
         public async Task<IHttpActionResult> Pickup(int id, User user)
         {
-            Ticket ticket = await db.Tickets.FindAsync(id);
-            if (ticket == null)
-                return NotFound();
-
-            ticket.PickedUp = DateTime.Now;
-            ticket.PickedUpBy = user.Name;
-            db.Entry(ticket).State = EntityState.Modified;
-
-            await db.SaveChangesAsync();
-
+            await _repo.Pickup(id, user);
             return StatusCode(HttpStatusCode.NoContent);
         }
 
-        protected override void Dispose(bool disposing)
+        // DELETE: api/Tickets/5
+        [ActionName("DefaultAction")]
+        [ResponseType(typeof(Ticket))]
+        public async Task<IHttpActionResult> DeleteTicket(int id)
         {
-            if (disposing)
-                db.Dispose();
-            base.Dispose(disposing);
-        }
-
-        private bool TicketExists(int id)
-        {
-            return db.Tickets.Count(e => e.Id == id) > 0;
+            try
+            {
+                Ticket ticket = await _repo.Delete(id);
+                return Ok(ticket);
+            }
+            catch (TicketNotFoundException)
+            {
+                return NotFound();
+            }
         }
     }
 }
